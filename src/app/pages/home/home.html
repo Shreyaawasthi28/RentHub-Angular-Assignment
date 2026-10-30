@@ -1,0 +1,238 @@
+
+<main id="home">
+  <section class="hero">
+    <div class="hero-content">
+      <span class="eyebrow">YOUR NEXT CHAPTER STARTS HERE</span>
+      <h1>Find a place<br />to call <span>home.</span></h1>
+      <p>Discover apartments that fit your lifestyle, your needs, and your budget.</p>
+      <a class="btn btn-primary btn-lg px-4 mt-2" routerLink="/" fragment="listings">Explore Apartments →</a>
+    </div>
+
+    <div class="hero-image">
+      <img
+        src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80"
+        alt="Beautiful modern apartment living room"
+      />
+      <div class="image-caption">
+        <span>Find your happy place</span>
+        <strong>Comfort. Space. Home.</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="search-section card card-body p-4" aria-label="Search apartments">
+    <form class="row g-3 align-items-end" (submit)="$event.preventDefault(); searchApartments(locationInput.value, minRentInput.value, maxRentInput.value)" novalidate>
+      <div class="col-12 col-lg-4">
+        <label class="form-label" for="location">Location</label>
+        <input #locationInput id="location" class="form-control form-control-lg" type="text" placeholder="Where do you want to live?" />
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <label class="form-label" for="minRent">Min rent (₹)</label>
+        <input
+          #minRentInput
+          id="minRent"
+          class="form-control form-control-lg"
+          [class.is-invalid]="priceError"
+          type="number"
+          min="0"
+          step="500"
+          placeholder="No minimum"
+          aria-describedby="priceError"
+        />
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <label class="form-label" for="maxRent">Max rent (₹)</label>
+        <input
+          #maxRentInput
+          id="maxRent"
+          class="form-control form-control-lg"
+          [class.is-invalid]="priceError"
+          type="number"
+          min="0"
+          step="500"
+          placeholder="No maximum"
+          aria-describedby="priceError"
+        />
+      </div>
+
+      <div class="col-12 col-lg-2 d-grid">
+        <button class="btn btn-primary btn-lg" type="submit">Search</button>
+      </div>
+
+      @if (priceError) {
+        <div id="priceError" class="col-12 text-danger small mt-1" role="alert">{{ priceError }}</div>
+      }
+
+      <fieldset class="col-12">
+        <legend class="form-label fs-6">Filter by amenities</legend>
+        <div class="d-flex flex-wrap gap-2">
+          @for (amenity of availableAmenities; track amenity) {
+            <input
+              type="checkbox"
+              class="btn-check"
+              [id]="'filter-' + $index"
+              autocomplete="off"
+              [checked]="selectedAmenities.includes(amenity)"
+              (change)="toggleAmenity(amenity, $any($event.target).checked)"
+            />
+            <label class="btn btn-sm btn-outline-primary rounded-pill" [for]="'filter-' + $index">{{ amenity }}</label>
+          }
+        </div>
+        @if (selectedAmenities.length) {
+          <button class="btn btn-link btn-sm px-0 mt-2" type="button" (click)="clearAmenityFilters()">
+            Clear amenities ({{ selectedAmenities.length }})
+          </button>
+        }
+      </fieldset>
+    </form>
+  </section>
+
+  <section class="featured-section" aria-label="Featured apartments">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">FEATURED HOMES</span>
+        <h2>Homes worth discovering</h2>
+        <p>Explore a few of our available properties.</p>
+      </div>
+      <div class="carousel-controls">
+        <button type="button" aria-label="Previous featured apartments" (click)="previousFeatured()">←</button>
+        <button type="button" aria-label="Next featured apartments" (click)="nextFeatured()">→</button>
+      </div>
+    </div>
+
+    <div class="featured-grid">
+      @for (apartment of featuredApartments; track apartment.id) {
+        <article class="featured-card">
+          <img [src]="apartment.image" [alt]="apartment.title" />
+          <div class="featured-content">
+            <span class="property-tag">{{ apartment.type }}</span>
+            <h3>{{ apartment.title }}</h3>
+            <p class="location">{{ apartment.location }}</p>
+            <p class="price">₹{{ apartment.rent.toLocaleString('en-IN') }} <span>/ month</span></p>
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-primary" type="button" (click)="viewDetails(apartment.id)">View Details</button>
+              <button
+                class="btn"
+                [class.btn-danger]="isFavorite(apartment.id)"
+                [class.btn-outline-danger]="!isFavorite(apartment.id)"
+                type="button"
+                (click)="toggleFavorite(apartment.id)"
+                [attr.aria-pressed]="isFavorite(apartment.id)"
+              >{{ isFavorite(apartment.id) ? '♥ Saved' : '♡ Mark as Favourite' }}</button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section id="listings" class="listings-section">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">HANDPICKED FOR YOU</span>
+        <h2>Explore apartments</h2>
+        <p>Find a space that feels like yours.</p>
+      </div>
+      <span class="listing-count">{{ filteredApartments.length }} properties</span>
+    </div>
+
+    <div class="sort-section">
+      <label class="form-label mb-0" for="sortBy">Sort apartments:</label>
+      <select id="sortBy" class="form-select" [value]="sortBy" (change)="onSortChange($any($event.target).value)">
+        <option value="default">Default order</option>
+        <option value="rentLow">Rent: Low to High</option>
+        <option value="rentHigh">Rent: High to Low</option>
+        <option value="title">Name: A to Z</option>
+      </select>
+    </div>
+
+    <div class="apartment-grid">
+      @for (apartment of paginatedApartments; track apartment.id) {
+        <article class="apartment-card">
+          <div class="apartment-image">
+            <img [src]="apartment.image" [alt]="apartment.title" />
+            <span class="property-tag">{{ apartment.type }}</span>
+            <button
+              class="favorite-btn"
+              type="button"
+              (click)="toggleFavorite(apartment.id)"
+              [attr.aria-label]="isFavorite(apartment.id) ? 'Remove from favourites' : 'Add to favourites'"
+              [attr.aria-pressed]="isFavorite(apartment.id)"
+            >{{ isFavorite(apartment.id) ? '♥' : '♡' }}</button>
+          </div>
+
+          <div class="card-content">
+            <p class="location">⌖ {{ apartment.location }}</p>
+            <h3>{{ apartment.title }}</h3>
+            <p class="description">{{ apartment.description }}</p>
+
+            <div class="apartment-info">
+              <span>🛏 {{ apartment.bedrooms }} Beds</span>
+              <span>▧ {{ apartment.area }} sq.ft.</span>
+            </div>
+
+            @if (apartment.amenities?.length) {
+              <div class="d-flex flex-wrap gap-1 mt-2">
+                @for (amenity of apartment.amenities; track amenity) {
+                  <span class="badge rounded-pill text-bg-green-light fw-normal">{{ amenity }}</span>
+                }
+              </div>
+            }
+
+            <div class="card-footer">
+              <p class="price">₹{{ apartment.rent.toLocaleString('en-IN') }} <span>/ month</span></p>
+              <button class="btn btn-primary btn-sm" type="button" (click)="viewDetails(apartment.id)">View Details</button>
+            </div>
+
+            @if (isOwner(apartment)) {
+              <button
+                class="btn btn-outline-primary btn-sm w-100 mt-3"
+                type="button"
+                (click)="editProperty(apartment.id)"
+              >Edit My Listing</button>
+            }
+          </div>
+        </article>
+      } @empty {
+        <p class="empty-message">No apartments found. Try changing your location, rent range, or amenities.</p>
+      }
+    </div>
+
+    @if (totalPages > 1) {
+      <nav class="mt-5" aria-label="Apartment listing pages">
+        <ul class="pagination justify-content-center flex-wrap">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" type="button" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Previous</button>
+          </li>
+          @for (page of pageNumbers; track page) {
+            <li class="page-item" [class.active]="currentPage === page">
+              <button
+                class="page-link"
+                type="button"
+                [attr.aria-current]="currentPage === page ? 'page' : null"
+                (click)="changePage(page)"
+              >{{ page }}</button>
+            </li>
+          }
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <button class="page-link" type="button" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">Next</button>
+          </li>
+        </ul>
+      </nav>
+    }
+  </section>
+
+  <section id="about" class="about-section">
+    <span class="eyebrow">ABOUT RENTHUB</span>
+    <h2>Finding your home, made simpler.</h2>
+    <p>Browse listings, save your favourites, and discover your next home with RentHub.</p>
+  </section>
+</main>
+
+<footer class="footer">
+  <a class="brand" routerLink="/">Rent<span>Hub</span></a>
+  <p>Find your space. Find your place.</p>
+  <p>© 2026 RentHub</p>
+</footer>

@@ -1,0 +1,54 @@
+/* Form controls, grid, cards and buttons come from Bootstrap.
+   This file only sets the page width and the photo thumbnails. */
+.create-post-page {
+  max-width: 950px;
+}
+
+.form-card {
+  border-color: #e5e9e3;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.form-card .card-title {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e9e3;
+}
+
+.preview-text {
+  overflow-wrap: anywhere;
+}
+
+/* Photo thumbnails in the form and preview */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.photo-grid figure {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 4 / 3;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.photo-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-grid .btn-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 6px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  opacity: 1;
+}

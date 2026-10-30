@@ -1,0 +1,45 @@
+<nav class="navbar navbar-expand-lg rh-navbar" aria-label="Main navigation">
+  <div class="container-xl">
+    <a class="navbar-brand brand" routerLink="/" (click)="closeMenu()">Rent<span>Hub</span></a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      aria-controls="mainNav"
+      [attr.aria-expanded]="menuOpen()"
+      aria-label="Toggle navigation"
+      (click)="toggleMenu()"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="mainNav" class="collapse navbar-collapse" [class.show]="menuOpen()">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" fragment="listings" (click)="closeMenu()">Apartments</a>
+        </li>
+        @if (currentUser()) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/create-post" routerLinkActive="active" (click)="closeMenu()">+ Create Post</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/profile" routerLinkActive="active" (click)="closeMenu()">Profile</a>
+          </li>
+        }
+      </ul>
+
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        @if (currentUser(); as user) {
+          <span class="fw-bold text-primary me-2">Hi, {{ user.name }}</span>
+          <button class="btn btn-outline-primary" type="button" (click)="logout()">Logout</button>
+        } @else {
+          <a class="btn btn-link text-decoration-none fw-bold" routerLink="/login" (click)="closeMenu()">Login</a>
+          <a class="btn btn-primary" routerLink="/register" (click)="closeMenu()">Register</a>
+        }
+      </div>
+    </div>
+  </div>
+</nav>

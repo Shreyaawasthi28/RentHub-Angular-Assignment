@@ -1,0 +1,27 @@
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+/* Colours only; layout and the mobile menu come from Bootstrap's navbar. */
+.rh-navbar {
+  border-bottom: 1px solid #8aaa80;
+  background: #f4f1ef;
+}
+
+.brand {
+  color: #204d3a;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.brand span {
+  color: #88ad7d;
+}
+
+.nav-link.active {
+  color: #719b68;
+  font-weight: 700;
+}

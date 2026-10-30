@@ -1,0 +1,592 @@
+
+<!-- Main container for the Create / Edit Post page -->
+<div class="create-post-page container py-4">
+
+  <!-- Page heading and navigation -->
+  <div class="mb-4">
+    <a routerLink="/" class="d-inline-block mb-3 fw-bold text-decoration-none">← Back to Home</a>
+    <h1 class="h2">{{ isEditMode ? 'Edit Property Post' : 'Create New Property Post' }}</h1>
+    <p class="text-secondary mb-0">Enter your property details to publish a rental listing. Fields marked * are required.</p>
+  </div>
+
+  <!-- Display success or validation messages -->
+  @if (message) {
+    <div class="alert alert-warning" role="status">
+      {{ message }}
+    </div>
+  }
+
+  <!-- Show the form until the user opens Preview (hidden if editing is not allowed) -->
+  @if (!showPreview && !isBlocked) {
+    <form #postForm="ngForm" (ngSubmit)="previewPost()" novalidate>
+
+      <!-- Apartment / building -->
+      <section class="card form-card mb-4">
+        <div class="card-body">
+          <h2 class="h5 card-title">Choose your Apartment/Building</h2>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="type">Property type *</label>
+              <select
+                id="type"
+                name="type"
+                class="form-select"
+                [class.is-invalid]="typeField.invalid && typeField.touched"
+                [(ngModel)]="property.type"
+                required
+                #typeField="ngModel"
+              >
+                <option value="" disabled>Select an option</option>
+                @for (type of propertyTypes; track type) {
+                  <option [value]="type">{{ type }}</option>
+                }
+              </select>
+              <div class="invalid-feedback">Please choose a property type.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="buildingName">Name of your apartment/building *</label>
+              <input
+                id="buildingName"
+                type="text"
+                name="buildingName"
+                class="form-control"
+                [class.is-invalid]="buildingField.invalid && buildingField.touched"
+                [(ngModel)]="property.buildingName"
+                required
+                minlength="2"
+                maxlength="80"
+                #buildingField="ngModel"
+                placeholder="Example: Green Valley Residency"
+              />
+              <div class="invalid-feedback">Please enter the apartment or building name.</div>
+            </div>
+
+            <fieldset class="col-12">
+              <legend class="form-label fs-6">Is this a shared property? *</legend>
+              @for (option of ['Yes', 'No']; track option) {
+                <div class="form-check form-check-inline">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="sharedProperty"
+                    [id]="'shared-' + option"
+                    [(ngModel)]="property.sharedProperty"
+                    [value]="option"
+                    required
+                  />
+                  <label class="form-check-label" [for]="'shared-' + option">{{ option }}</label>
+                </div>
+              }
+            </fieldset>
+          </div>
+        </div>
+      </section>
+
+      <!-- Location -->
+      <section class="card form-card mb-4">
+        <div class="card-body">
+          <h2 class="h5 card-title">Property Location</h2>
+
+          <label class="form-label" for="location">Street address and city *</label>
+          <input
+            id="location"
+            type="text"
+            name="location"
+            class="form-control"
+            [class.is-invalid]="locationField.invalid && locationField.touched"
+            [(ngModel)]="property.location"
+            required
+            minlength="3"
+            maxlength="150"
+            #locationField="ngModel"
+            placeholder="Example: 12 Mall Road, Kanpur"
+          />
+          <div class="invalid-feedback">Please enter a valid address.</div>
+        </div>
+      </section>
+
+      <!-- Property details -->
+      <section class="card form-card mb-4">
+        <div class="card-body">
+          <h2 class="h5 card-title">Property Details</h2>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="area">Square feet *</label>
+              <input
+                id="area"
+                type="number"
+                name="area"
+                class="form-control"
+                [class.is-invalid]="areaField.invalid && areaField.touched"
+                [(ngModel)]="property.area"
+                required
+                min="1"
+                #areaField="ngModel"
+                placeholder="Enter area in square feet"
+              />
+              <div class="invalid-feedback">Area must be greater than zero.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="bedrooms">Number of bedrooms *</label>
+              <input
+                id="bedrooms"
+                type="number"
+                name="bedrooms"
+                class="form-control"
+                [class.is-invalid]="bedroomsField.invalid && bedroomsField.touched"
+                [(ngModel)]="property.bedrooms"
+                required
+                min="1"
+                max="20"
+                step="1"
+                #bedroomsField="ngModel"
+                placeholder="2"
+              />
+              <div class="invalid-feedback">Enter a bedroom count between 1 and 20.</div>
+            </div>
+
+            <fieldset class="col-12">
+              <legend class="form-label fs-6">Stay / Lease type *</legend>
+              @for (option of leaseTypes; track option) {
+                <div class="form-check form-check-inline">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="leaseType"
+                    [id]="'lease-' + $index"
+                    [(ngModel)]="property.leaseType"
+                    [value]="option"
+                    required
+                  />
+                  <label class="form-check-label" [for]="'lease-' + $index">{{ option }}</label>
+                </div>
+              }
+            </fieldset>
+          </div>
+        </div>
+      </section>
+
+      <!-- Expected rent -->
+      <section class="card form-card mb-4">
+        <div class="card-body">
+          <h2 class="h5 card-title">Expected Rent</h2>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="rent">Expected rent *</label>
+              <div class="input-group has-validation">
+                <span class="input-group-text">₹</span>
+                <input
+                  id="rent"
+                  type="number"
+                  name="rent"
+                  class="form-control"
+                  [class.is-invalid]="rentField.invalid && rentField.touched"
+                  [(ngModel)]="property.rent"
+                  required
+                  min="1"
+                  #rentField="ngModel"
+                  placeholder="Enter expected rent"
+                />
+                <div class="invalid-feedback">Rent must be greater than zero.</div>
+              </div>
+
+              <div class="form-check mt-2">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="negotiable"
+                  name="negotiable"
+                  [(ngModel)]="property.negotiable"
+                />
+                <label class="form-check-label" for="negotiable">Negotiable</label>
+              </div>
+            </div>
+
+            <fieldset class="col-md-6">
+              <legend class="form-label fs-6">Price mode *</legend>
+              @for (option of priceModes; track option) {
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="priceMode"
+                    [id]="'price-' + $index"
+                    [(ngModel)]="property.priceMode"
+                    [value]="option"
+                    required
+                  />
+                  <label class="form-check-label" [for]="'price-' + $index">{{ option }}</label>
+                </div>
+              }
+            </fieldset>
+          </div>
+        </div>
+      </section>
+
+      <!-- Furnishing, amenities and preferences -->
+      <section class="card form-card mb-4">
+        <div class="card-body">
+          <h2 class="h5 card-title">Is the room/apartment furnished? *</h2>
+          @for (option of ['Furnished', 'Semi-Furnished', 'Unfurnished']; track option) {
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="furnished"
+                [id]="'furnished-' + $index"
+                [(ngModel)]="property.furnished"
+                [value]="option"
+                required
+              />
+              <label class="form-check-label" [for]="'furnished-' + $index">{{ option }}</label>
+            </div>
+          }
+
+          <h2 class="h5 card-title mt-4">Amenities included</h2>
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2">
+            @for (amenity of availableAmenities; track amenity) {
+              <div class="col">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    [id]="'amenity-' + $index"
+                    [checked]="property.amenities.includes(amenity)"
+                    (change)="toggleAmenity(amenity, $any($event.target).checked)"
+                  />
+                  <label class="form-check-label" [for]="'amenity-' + $index">{{ amenity }}</label>
+                </div>
+              </div>
+            }
+          </div>
+
+          <h2 class="h5 card-title mt-4">Vegetarian preference *</h2>
+          @for (option of ['Vegetarian Preferred', 'No Preference']; track option) {
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="vegetarianPreference"
+                [id]="'veg-' + $index"
+                [(ngModel)]="property.vegetarianPreference"
+                [value]="option"
+                required
+              />
+              <label class="form-check-label" [for]="'veg-' + $index">{{ option }}</label>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Title and description -->
+      <section class="card form-card mb-4">
+        <div class="card-body">
+          <h2 class="h5 card-title">Description</h2>
+
+          <div class="mb-3">
+            <label class="form-label" for="title">Title *</label>
+            <input
+              id="title"
+              type="text"
+              name="title"
+              class="form-control"
+              [class.is-invalid]="titleField.invalid && titleField.touched"
+              [(ngModel)]="property.title"
+              required
+              minlength="5"
+              maxlength="100"
+              #titleField="ngModel"
+              placeholder="Enter your AD title"
+            />
+            <div class="invalid-feedback">Title is required and must contain at least 5 characters.</div>
+          </div>
+
+          <label class="form-label" for="description">Description *</label>
+          <textarea
+            id="description"
+            name="description"
+            class="form-control"
+            [class.is-invalid]="descriptionField.invalid && descriptionField.touched"
+            [(ngModel)]="property.description"
+            required
+            minlength="20"
+            [maxlength]="maxDescriptionLength"
+            rows="6"
+            #descriptionField="ngModel"
+            placeholder="Enter a detailed description within 1400 characters"
+          ></textarea>
+          <div class="invalid-feedback">Description must contain 20 to 1400 characters.</div>
+          <div class="form-text">{{ property.description.length }} / {{ maxDescriptionLength }} characters</div>
+        </div>
+      </section>
+
+      <!-- Photos -->
+      <section class="card form-card mb-4">
+        <div class="card-body">
+          <h2 class="h5 card-title">Photos</h2>
+
+          <div class="mb-3">
+            <label class="form-label" for="photoUpload">Upload photos (up to {{ maxPhotos }})</label>
+            <input
+              id="photoUpload"
+              type="file"
+              class="form-control"
+              accept="image/*"
+              multiple
+              [disabled]="property.photos.length >= maxPhotos"
+              (change)="onPhotosSelected($any($event.target))"
+            />
+          </div>
+
+          <label class="form-label" for="photoUrl">Or add a photo by URL</label>
+          <div class="input-group">
+            <input
+              id="photoUrl"
+              type="url"
+              name="photoUrl"
+              class="form-control"
+              [(ngModel)]="photoUrl"
+              placeholder="https://example.com/property.jpg"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              [disabled]="!photoUrl.trim() || property.photos.length >= maxPhotos"
+              (click)="addPhotoUrl()"
+            >
+              Add
+            </button>
+          </div>
+
+          @if (photoMessage) {
+            <div class="text-danger small mt-2" role="status">{{ photoMessage }}</div>
+          }
+
+          @if (property.photos.length) {
+            <div class="photo-grid">
+              @for (photo of property.photos; track $index) {
+                <figure>
+                  <img [src]="photo" [alt]="'Photo ' + ($index + 1)" />
+                  <button
+                    type="button"
+                    class="btn-close"
+                    [attr.aria-label]="'Remove photo ' + ($index + 1)"
+                    (click)="removePhoto($index)"
+                  ></button>
+                </figure>
+              }
+            </div>
+          } @else {
+            <div class="form-text">No photos added. A default image will be shown.</div>
+          }
+        </div>
+      </section>
+
+      <!-- Contact details -->
+      <section class="card form-card mb-4">
+        <div class="card-body">
+          <h2 class="h5 card-title">Contact Information</h2>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label" for="contactName">Contact name *</label>
+              <input
+                id="contactName"
+                type="text"
+                name="contactName"
+                class="form-control"
+                [class.is-invalid]="contactNameField.invalid && contactNameField.touched"
+                [(ngModel)]="property.contactName"
+                required
+                minlength="2"
+                #contactNameField="ngModel"
+                placeholder="Enter your name"
+              />
+              <div class="invalid-feedback">Contact name must contain at least 2 characters.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="contactEmail">Email address *</label>
+              <input
+                id="contactEmail"
+                type="email"
+                name="contactEmail"
+                class="form-control"
+                [class.is-invalid]="emailField.invalid && emailField.touched"
+                [(ngModel)]="property.contactEmail"
+                required
+                email
+                #emailField="ngModel"
+                placeholder="you@example.com"
+              />
+              <div class="invalid-feedback">Enter a valid email address.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="contactPhone">10-digit phone number *</label>
+              <input
+                id="contactPhone"
+                type="tel"
+                name="contactPhone"
+                class="form-control"
+                [class.is-invalid]="phoneField.invalid && phoneField.touched"
+                [(ngModel)]="property.contactPhone"
+                required
+                pattern="[0-9 ()+-]{10,16}"
+                #phoneField="ngModel"
+                placeholder="9876543210"
+              />
+              <div class="invalid-feedback">Enter a valid phone number using 10 digits.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Validate the form before displaying the preview -->
+      <div class="d-flex flex-column flex-sm-row gap-2">
+        <button type="submit" class="btn btn-primary btn-lg" [disabled]="postForm.invalid">
+          Preview Property
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-lg" (click)="resetForm()">
+          Reset Form
+        </button>
+      </div>
+    </form>
+  }
+
+  <!-- Preview and Submit (bonus) -->
+  @if (showPreview) {
+    <section class="card form-card">
+      <div class="card-body">
+        <h2 class="h4 text-center">Preview and Submit</h2>
+        <p class="text-secondary text-center">Check your details before submitting the listing.</p>
+
+        <h3 class="h5 mb-3">{{ property.title }}</h3>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h4 class="h6">Property Type</h4>
+                <p class="mb-1">{{ property.type }} · {{ property.buildingName }}</p>
+                <p class="mb-0 text-secondary">Shared property: {{ property.sharedProperty }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h4 class="h6">Number of Beds</h4>
+                <p class="mb-1">{{ property.bedrooms }} · {{ property.area }} sq. ft.</p>
+                <p class="mb-0 text-secondary">{{ property.furnished }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h4 class="h6">Address</h4>
+                <p class="mb-0">{{ property.location }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h4 class="h6">Rent</h4>
+                <p class="mb-1">
+                  ₹{{ property.rent?.toLocaleString('en-IN') }}/month
+                  @if (property.negotiable) {
+                    <span class="badge text-bg-warning">Negotiable</span>
+                  }
+                </p>
+                <p class="mb-0 text-secondary">{{ property.priceMode }} · {{ property.leaseType }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h4 class="h6">Description</h4>
+                <p class="mb-0 preview-text">{{ property.description }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h4 class="h6">Amenities</h4>
+                @if (property.amenities.length) {
+                  <div class="d-flex flex-wrap gap-1">
+                    @for (amenity of property.amenities; track amenity) {
+                      <span class="badge rounded-pill text-bg-green-light fw-normal">{{ amenity }}</span>
+                    }
+                  </div>
+                } @else {
+                  <p class="mb-0 text-secondary">None selected</p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h4 class="h6">Preferences</h4>
+                <p class="mb-0">{{ property.vegetarianPreference }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h4 class="h6">Contact</h4>
+                <p class="mb-1">{{ property.contactName }}</p>
+                <p class="mb-0 text-secondary preview-text">{{ property.contactEmail }} · {{ property.contactPhone }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="h6">Photos</h4>
+                @if (property.photos.length) {
+                  <div class="photo-grid">
+                    @for (photo of property.photos; track $index) {
+                      <figure>
+                        <img [src]="photo" [alt]="property.title + ' photo ' + ($index + 1)" />
+                      </figure>
+                    }
+                  </div>
+                } @else {
+                  <p class="mb-0 text-secondary">No photos added. A default image will be shown.</p>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
+          <button type="button" class="btn btn-outline-secondary btn-lg" (click)="editPost()">
+            Edit Details
+          </button>
+          <button type="button" class="btn btn-primary btn-lg" (click)="submitPost()">
+            Submit Property
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+</div>

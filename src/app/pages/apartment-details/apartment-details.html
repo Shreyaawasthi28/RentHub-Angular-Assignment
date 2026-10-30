@@ -1,0 +1,346 @@
+
+<div class="details-page container py-4">
+
+  <a class="d-inline-block mb-3 fw-bold text-decoration-none" routerLink="/">← Back to Apartments</a>
+
+  @if (apartment) {
+    <article class="card details-card mb-4">
+
+      <!-- Property photos -->
+      <img
+        class="property-image card-img-top"
+        [src]="selectedPhoto"
+        [alt]="apartment.title"
+      />
+
+      @if (photos.length > 1) {
+        <div class="photo-thumbnails" aria-label="Property photos">
+          @for (photo of photos; track $index) {
+            <button
+              type="button"
+              [class.selected]="photo === selectedPhoto"
+              [attr.aria-label]="'Show photo ' + ($index + 1)"
+              (click)="selectedPhoto = photo"
+            >
+              <img [src]="photo" alt="" />
+            </button>
+          }
+        </div>
+      }
+
+      <div class="card-body p-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <span class="badge text-bg-green-light fs-6">{{ apartment.type }}</span>
+          <button
+            class="btn"
+            type="button"
+            [class.btn-danger]="isFavorite"
+            [class.btn-outline-danger]="!isFavorite"
+            [attr.aria-pressed]="isFavorite"
+            (click)="toggleFavorite()"
+          >{{ isFavorite ? '♥ Saved to favourites' : '♡ Mark as Favourite' }}</button>
+        </div>
+
+        <h1 class="h2 mt-3 mb-1">{{ apartment.title }}</h1>
+        @if (apartment.buildingName) {
+          <p class="fw-bold text-secondary mb-1">{{ apartment.buildingName }}</p>
+        }
+        <p class="location">📍 {{ apartment.location }}</p>
+
+        <p class="rent">
+          ₹{{ apartment.rent.toLocaleString('en-IN') }}
+          <span>/ month</span>
+          @if (apartment.negotiable) {
+            <span class="badge text-bg-warning align-middle ms-2">Negotiable</span>
+          }
+        </p>
+
+        <div class="d-flex flex-wrap gap-4 py-3 border-top border-bottom text-secondary">
+          <span>🛏 {{ apartment.bedrooms }} Bedrooms</span>
+          <span>▧ {{ apartment.area }} sq.ft.</span>
+        </div>
+
+        <h2 class="h5 mt-4">About this property</h2>
+        <p class="text-secondary lh-lg">{{ apartment.description }}</p>
+
+        <h2 class="h5 mt-4">Property features</h2>
+        <dl class="row row-cols-2 row-cols-md-3 g-3 mb-0">
+          @if (apartment.furnished) {
+            <div class="col">
+              <dt class="small text-secondary fw-normal">Furnishing</dt>
+              <dd class="fw-bold mb-0">{{ apartment.furnished }}</dd>
+            </div>
+          }
+          @if (apartment.sharedProperty) {
+            <div class="col">
+              <dt class="small text-secondary fw-normal">Shared property</dt>
+              <dd class="fw-bold mb-0">{{ apartment.sharedProperty }}</dd>
+            </div>
+          }
+          @if (apartment.leaseType) {
+            <div class="col">
+              <dt class="small text-secondary fw-normal">Lease type</dt>
+              <dd class="fw-bold mb-0">{{ apartment.leaseType }}</dd>
+            </div>
+          }
+          @if (apartment.priceMode) {
+            <div class="col">
+              <dt class="small text-secondary fw-normal">Price mode</dt>
+              <dd class="fw-bold mb-0">{{ apartment.priceMode }}</dd>
+            </div>
+          }
+          @if (apartment.vegetarianPreference) {
+            <div class="col">
+              <dt class="small text-secondary fw-normal">Vegetarian preference</dt>
+              <dd class="fw-bold mb-0">{{ apartment.vegetarianPreference }}</dd>
+            </div>
+          }
+        </dl>
+
+        <h2 class="h5 mt-4">Amenities</h2>
+        @if (apartment.amenities.length) {
+          <ul class="amenity-list list-unstyled d-flex flex-wrap gap-2 mb-0">
+            @for (amenity of apartment.amenities; track amenity) {
+              <li class="badge rounded-pill text-bg-green-light fw-normal fs-6">{{ amenity }}</li>
+            }
+          </ul>
+        } @else {
+          <p class="text-secondary">No amenities listed.</p>
+        }
+
+        @if (apartment.contactName || apartment.contactEmail || apartment.contactPhone) {
+          <section class="contact-card card bg-light border-0 mt-4" aria-label="Contact details">
+            <div class="card-body">
+              <h2 class="h5">Contact the landlord</h2>
+              @if (apartment.contactName) {
+                <p class="fw-bold mb-1">{{ apartment.contactName }}</p>
+              }
+              @if (apartment.contactEmail) {
+                <p class="mb-1">✉ <a class="fw-bold" [href]="'mailto:' + apartment.contactEmail">{{ apartment.contactEmail }}</a></p>
+              }
+              @if (apartment.contactPhone) {
+                <p class="mb-0">☎ <a class="fw-bold" [href]="'tel:' + apartment.contactPhone">{{ apartment.contactPhone }}</a></p>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- Send an inquiry to the landlord -->
+        <section class="mt-4" aria-label="Send an inquiry">
+          <h2 class="h5">Interested? Send an inquiry</h2>
+
+          @if (!isLoggedIn) {
+            <div class="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-2">
+              <span>Please log in to send an inquiry to the landlord.</span>
+              <button class="btn btn-primary btn-sm" type="button" (click)="goToLogin()">Login</button>
+            </div>
+          } @else if (!canSendInquiry) {
+            <p class="text-secondary">This is your listing. Inquiries from renters appear on your Profile page.</p>
+          } @else {
+            <form #inquiryForm="ngForm" (ngSubmit)="sendInquiry()" novalidate>
+              <div class="mb-3">
+                <label class="form-label" for="inquiryMessage">Message to the landlord *</label>
+                <textarea
+                  id="inquiryMessage"
+                  name="inquiryMessage"
+                  class="form-control"
+                  [class.is-invalid]="inquiryInput.invalid && inquiryInput.touched"
+                  [(ngModel)]="inquiryMessage"
+                  #inquiryInput="ngModel"
+                  required
+                  minlength="10"
+                  maxlength="500"
+                  rows="4"
+                  placeholder="Hi, I'm interested in this property. Is it still available?"
+                ></textarea>
+                <div class="invalid-feedback">Inquiry must contain 10 to 500 characters.</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="inquiryPhone">Your phone number (optional)</label>
+                <input
+                  id="inquiryPhone"
+                  name="inquiryPhone"
+                  type="tel"
+                  class="form-control"
+                  [class.is-invalid]="inquiryPhoneInput.invalid && inquiryPhoneInput.touched"
+                  [(ngModel)]="inquiryPhone"
+                  #inquiryPhoneInput="ngModel"
+                  pattern="[0-9 ()+-]{10,16}"
+                  placeholder="9876543210"
+                />
+                <div class="invalid-feedback">Enter a valid phone number using 10 digits.</div>
+              </div>
+
+              <button class="btn btn-primary" type="submit" [disabled]="inquiryForm.invalid || !inquiryMessage.trim()">
+                Send Inquiry
+              </button>
+            </form>
+          }
+
+          @if (inquiryStatus) {
+            <div
+              class="alert mt-3 mb-0"
+              [class.alert-success]="inquirySent"
+              [class.alert-danger]="!inquirySent"
+              aria-live="polite"
+            >
+              {{ inquiryStatus }}
+            </div>
+          }
+        </section>
+      </div>
+    </article>
+
+    <!-- Comments section -->
+    <section class="card comments-section">
+      <div class="card-body p-4">
+        <h2 class="h4">Comments and Reviews</h2>
+        <p class="text-secondary">Questions or thoughts about this property?</p>
+
+        <!-- Comment form for logged-in users -->
+        @if (isLoggedIn) {
+          <form #commentForm="ngForm" (ngSubmit)="addComment()" novalidate>
+            <label class="form-label" for="comment">Your comment</label>
+
+            <textarea
+              id="comment"
+              name="comment"
+              class="form-control"
+              [class.is-invalid]="commentInput.invalid && commentInput.touched"
+              [(ngModel)]="newComment"
+              #commentInput="ngModel"
+              placeholder="Write your comment here..."
+              required
+              minlength="2"
+              maxlength="500"
+              rows="4"
+            ></textarea>
+
+            <div class="invalid-feedback">
+              @if (commentInput.errors?.['required']) {
+                Comment is required.
+              } @else if (commentInput.errors?.['minlength']) {
+                Comment must contain at least 2 characters.
+              } @else if (commentInput.errors?.['maxlength']) {
+                Comment cannot exceed 500 characters.
+              }
+            </div>
+
+            <div class="form-text mb-2">{{ newComment.length }} / 500 characters</div>
+
+            <button
+              class="btn btn-primary"
+              type="submit"
+              [disabled]="commentForm.invalid || !newComment.trim()"
+            >
+              Add Comment
+            </button>
+          </form>
+        } @else {
+          <div class="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <span>Please log in to add a comment or reply.</span>
+            <button class="btn btn-primary btn-sm" type="button" (click)="goToLogin()">Login</button>
+          </div>
+        }
+
+        <!-- Success and validation messages -->
+        <p class="validation-message mt-3" aria-live="polite">
+          {{ validationMessage }}
+        </p>
+
+        <!-- Comments list -->
+        <div class="d-grid gap-3">
+          @for (comment of comments; track $index) {
+            <article class="card comment-card">
+              <div class="card-body">
+                <h3 class="h6 mb-1">{{ comment.name }}</h3>
+                <p class="mb-1">{{ comment.message }}</p>
+                <small class="text-secondary">{{ comment.date | date:'medium' }}</small>
+
+                <!-- Reply button -->
+                @if (isLoggedIn && replyingTo !== $index) {
+                  <div class="mt-2">
+                    <button class="btn btn-outline-primary btn-sm" type="button" (click)="startReply($index)">
+                      Reply
+                    </button>
+                  </div>
+                }
+
+                <!-- Reply form -->
+                @if (replyingTo === $index) {
+                  <form
+                    class="mt-3"
+                    #replyForm="ngForm"
+                    (ngSubmit)="addReply($index)"
+                    novalidate
+                  >
+                    <label class="form-label" [for]="'reply-' + $index">Your reply</label>
+
+                    <textarea
+                      class="form-control"
+                      [class.is-invalid]="replyInput.invalid && replyInput.touched"
+                      [id]="'reply-' + $index"
+                      [name]="'reply-' + $index"
+                      [(ngModel)]="replyMessage"
+                      #replyInput="ngModel"
+                      placeholder="Write your reply here..."
+                      required
+                      minlength="2"
+                      maxlength="500"
+                      rows="3"
+                    ></textarea>
+                    <div class="invalid-feedback">Reply must contain 2 to 500 characters.</div>
+
+                    <div class="form-text mb-2">{{ replyMessage.length }} / 500 characters</div>
+
+                    <div class="d-flex gap-2">
+                      <button
+                        class="btn btn-primary btn-sm"
+                        type="submit"
+                        [disabled]="replyForm.invalid || !replyMessage.trim()"
+                      >
+                        Submit Reply
+                      </button>
+                      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="cancelReply()">
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                }
+
+                <!-- Saved replies -->
+                @if (comment.replies && comment.replies.length > 0) {
+                  <div class="replies-section mt-3 ps-3 border-start border-3">
+                    <h4 class="h6 text-secondary">Replies ({{ comment.replies.length }})</h4>
+
+                    @for (reply of comment.replies; track $index) {
+                      <div class="bg-light rounded p-2 mb-2">
+                        <h5 class="h6 mb-1">{{ reply.name }}</h5>
+                        <p class="mb-1">{{ reply.message }}</p>
+                        <small class="text-secondary">{{ reply.date | date:'medium' }}</small>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </article>
+          } @empty {
+            <p class="text-secondary fst-italic">
+              No comments yet. Be the first to comment!
+            </p>
+          }
+        </div>
+      </div>
+    </section>
+
+  } @else {
+    <!-- Property not found -->
+    <div class="alert alert-warning text-center p-5">
+      <h2 class="h4">Apartment not found</h2>
+      <p>This property may not exist or the link may be incorrect.</p>
+      <a class="btn btn-primary" routerLink="/">Return to Home</a>
+    </div>
+  }
+
+</div>

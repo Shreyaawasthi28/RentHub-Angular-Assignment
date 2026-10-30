@@ -1,0 +1,132 @@
+<div class="profile-page container py-4">
+  @if (currentUser(); as user) {
+    <header class="card profile-header mb-4">
+      <div class="card-body d-flex flex-wrap align-items-center gap-3 p-4">
+        <div class="avatar" aria-hidden="true">{{ user.name.charAt(0).toUpperCase() }}</div>
+        <div>
+          <h1 class="h3 mb-1">{{ user.name }}</h1>
+          <p class="text-secondary mb-0">{{ user.email }}</p>
+        </div>
+        <a class="btn btn-primary ms-sm-auto" routerLink="/create-post">+ Create Post</a>
+      </div>
+    </header>
+
+    <ul class="nav nav-tabs flex-nowrap overflow-x-auto overflow-y-hidden mb-4" role="tablist" aria-label="Profile sections">
+      @for (tab of tabs; track tab.id) {
+        <li class="nav-item" role="presentation">
+          <button
+            type="button"
+            role="tab"
+            class="nav-link text-nowrap"
+            [class.active]="activeTab === tab.id"
+            [attr.aria-selected]="activeTab === tab.id"
+            (click)="selectTab(tab.id)"
+          >
+            {{ tab.label }}
+            <span class="badge rounded-pill text-bg-secondary ms-1">{{ countFor(tab.id) }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+
+    <section role="tabpanel">
+      @switch (activeTab) {
+        @case ('listings') {
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+            @for (apartment of myListings; track apartment.id) {
+              <div class="col">
+                <article class="card h-100 listing-card">
+                  <img class="card-img-top" [src]="apartment.image" [alt]="apartment.title" />
+                  <div class="card-body">
+                    <h3 class="h6 card-title">{{ apartment.title }}</h3>
+                    <p class="small text-secondary mb-1">{{ apartment.location }}</p>
+                    <p class="fw-bold text-primary">₹{{ apartment.rent.toLocaleString('en-IN') }} / month</p>
+                  </div>
+                  <div class="card-footer bg-transparent d-flex flex-wrap gap-2">
+                    <a class="btn btn-outline-primary btn-sm" [routerLink]="['/apartment', apartment.id]">View</a>
+                    <button class="btn btn-outline-primary btn-sm" type="button" (click)="editListing(apartment.id)">Edit</button>
+                    <button class="btn btn-outline-danger btn-sm" type="button" (click)="deleteListing(apartment)">Delete</button>
+                  </div>
+                </article>
+              </div>
+            } @empty {
+              <div class="col-12">
+                <div class="alert alert-light border">
+                  You have not posted any listings yet. <a class="fw-bold" routerLink="/create-post">Create your first post</a>.
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @case ('favourites') {
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+            @for (apartment of favourites; track apartment.id) {
+              <div class="col">
+                <article class="card h-100 listing-card">
+                  <img class="card-img-top" [src]="apartment.image" [alt]="apartment.title" />
+                  <div class="card-body">
+                    <h3 class="h6 card-title">{{ apartment.title }}</h3>
+                    <p class="small text-secondary mb-1">{{ apartment.location }}</p>
+                    <p class="fw-bold text-primary">₹{{ apartment.rent.toLocaleString('en-IN') }} / month</p>
+                  </div>
+                  <div class="card-footer bg-transparent d-flex flex-wrap gap-2">
+                    <a class="btn btn-primary btn-sm" [routerLink]="['/apartment', apartment.id]">View Details</a>
+                    <button class="btn btn-outline-danger btn-sm" type="button" (click)="removeFavourite(apartment.id)">Remove</button>
+                  </div>
+                </article>
+              </div>
+            } @empty {
+              <div class="col-12">
+                <div class="alert alert-light border">No favourites yet. Tap ♡ on a listing to save it here.</div>
+              </div>
+            }
+          </div>
+        }
+
+        @case ('received') {
+          <div class="list-group">
+            @for (inquiry of receivedInquiries; track inquiry.id) {
+              <article class="list-group-item py-3">
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+                  <h3 class="h6 mb-1">
+                    <a [routerLink]="['/apartment', inquiry.apartmentId]">{{ inquiry.apartmentTitle }}</a>
+                  </h3>
+                  <small class="text-secondary">{{ inquiry.date | date: 'medium' }}</small>
+                </div>
+                <p class="small text-secondary mb-2">
+                  From {{ inquiry.fromName }} ·
+                  <a [href]="'mailto:' + inquiry.fromEmail">{{ inquiry.fromEmail }}</a>
+                  @if (inquiry.phone) {
+                    · <a [href]="'tel:' + inquiry.phone">{{ inquiry.phone }}</a>
+                  }
+                </p>
+                <p class="mb-0">{{ inquiry.message }}</p>
+              </article>
+            } @empty {
+              <div class="alert alert-light border">No inquiries received yet.</div>
+            }
+          </div>
+        }
+
+        @case ('sent') {
+          <div class="list-group">
+            @for (inquiry of sentInquiries; track inquiry.id) {
+              <article class="list-group-item py-3">
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+                  <h3 class="h6 mb-1">
+                    <a [routerLink]="['/apartment', inquiry.apartmentId]">{{ inquiry.apartmentTitle }}</a>
+                  </h3>
+                  <small class="text-secondary">{{ inquiry.date | date: 'medium' }}</small>
+                </div>
+                <p class="mb-0">{{ inquiry.message }}</p>
+              </article>
+            } @empty {
+              <div class="alert alert-light border">You have not sent any inquiries yet.</div>
+            }
+          </div>
+        }
+      }
+    </section>
+  }
+</div>

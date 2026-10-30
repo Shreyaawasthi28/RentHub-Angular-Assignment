@@ -1,0 +1,77 @@
+
+<section class="auth-page">
+  <div class="card auth-card border-0 shadow-sm">
+    <div class="card-body p-4 p-sm-5">
+      <a class="brand" routerLink="/">Rent<span>Hub</span></a>
+
+      <h1 class="h3 mt-4 mb-1">Create an account</h1>
+      <p class="text-secondary">Join RentHub to find your perfect home.</p>
+
+      <form (ngSubmit)="register()" #registerForm="ngForm" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="name">Full name</label>
+          <input
+            id="name"
+            type="text"
+            name="name"
+            class="form-control"
+            [class.is-invalid]="nameField.invalid && nameField.touched"
+            [(ngModel)]="name"
+            required
+            minlength="2"
+            #nameField="ngModel"
+            placeholder="Enter your full name"
+          />
+          <div class="invalid-feedback">Please enter your name (at least 2 characters).</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="email">Email address</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            class="form-control"
+            [class.is-invalid]="emailField.invalid && emailField.touched"
+            [(ngModel)]="email"
+            required
+            email
+            #emailField="ngModel"
+            placeholder="you@example.com"
+          />
+          <div class="invalid-feedback">Please enter a valid email address.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            class="form-control"
+            [class.is-invalid]="passwordField.invalid && passwordField.touched"
+            [(ngModel)]="password"
+            required
+            minlength="6"
+            #passwordField="ngModel"
+            placeholder="At least 6 characters"
+          />
+          <div class="invalid-feedback">Password must contain at least 6 characters.</div>
+        </div>
+
+        @if (message) {
+          <div class="alert alert-danger py-2" role="alert">{{ message }}</div>
+        }
+
+        <button class="btn btn-primary w-100 py-2" type="submit" [disabled]="registerForm.invalid">
+          Create Account
+        </button>
+      </form>
+
+      <p class="text-secondary small mt-4 mb-0">
+        Already registered?
+        <a class="fw-bold" routerLink="/login">Login</a>
+      </p>
+    </div>
+  </div>
+</section>

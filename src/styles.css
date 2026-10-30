@@ -1,1 +1,105 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles for RentHub. Bootstrap provides the layout grid, forms, buttons,
+   alerts, navbar, tabs and pagination; the variables below give it the RentHub theme. */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+:root {
+  --rh-green: #204d3a;
+  --rh-green-hover: #35684d;
+  --rh-green-light: #edf4e9;
+
+  --bs-primary: #204d3a;
+  --bs-primary-rgb: 32, 77, 58;
+  --bs-link-color: #204d3a;
+  --bs-link-color-rgb: 32, 77, 58;
+  --bs-link-hover-color: #35684d;
+  --bs-link-hover-color-rgb: 53, 104, 77;
+  --bs-body-font-family: Arial, sans-serif;
+  --bs-body-color: #20352b;
+  --bs-border-radius: 0.5rem;
+  --bs-focus-ring-color: rgba(32, 77, 58, 0.25);
+}
+
+.btn-primary {
+  --bs-btn-bg: #204d3a;
+  --bs-btn-border-color: #204d3a;
+  --bs-btn-hover-bg: #35684d;
+  --bs-btn-hover-border-color: #35684d;
+  --bs-btn-active-bg: #183b2c;
+  --bs-btn-active-border-color: #183b2c;
+  --bs-btn-disabled-bg: #204d3a;
+  --bs-btn-disabled-border-color: #204d3a;
+  --bs-btn-font-weight: 700;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: #204d3a;
+  --bs-btn-border-color: #204d3a;
+  --bs-btn-hover-bg: #204d3a;
+  --bs-btn-hover-border-color: #204d3a;
+  --bs-btn-active-bg: #183b2c;
+  --bs-btn-active-border-color: #183b2c;
+  --bs-btn-font-weight: 700;
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: #71966a;
+  box-shadow: 0 0 0 0.25rem var(--bs-focus-ring-color);
+}
+
+.form-check-input:checked {
+  background-color: #204d3a;
+  border-color: #204d3a;
+}
+
+.form-label {
+  font-weight: 700;
+}
+
+.pagination {
+  --bs-pagination-color: #204d3a;
+  --bs-pagination-hover-color: #204d3a;
+  --bs-pagination-focus-color: #204d3a;
+  --bs-pagination-active-bg: #204d3a;
+  --bs-pagination-active-border-color: #204d3a;
+}
+
+.nav-tabs {
+  --bs-nav-link-color: #53665a;
+  --bs-nav-link-hover-color: #204d3a;
+  --bs-nav-tabs-link-active-color: #204d3a;
+}
+
+.nav-tabs .nav-link {
+  font-weight: 700;
+}
+
+.text-bg-green-light {
+  background: var(--rh-green-light) !important;
+  color: #35684d !important;
+}
+
+html {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background: #ffffff;
+}
+
+app-root {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
+img {
+  max-width: 100%;
+}
