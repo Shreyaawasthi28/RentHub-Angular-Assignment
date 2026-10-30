@@ -2,6 +2,10 @@
 
 RentHub is an Angular web application where landlords post apartments for rent, renters search, save favourites and send inquiries, and both sides discuss listings through comments and replies.
 
+- 🌐 **Live Demo:** [https://zesty-marzipan-a618f6.netlify.app/](https://zesty-marzipan-a618f6.netlify.app/)
+- 💻 **GitHub Repository:** [https://github.com/Shreyaawasthi28/RentHub-Angular-Assignment](https://github.com/Shreyaawasthi28/RentHub-Angular-Assignment)
+
+
 
 ## Demo Credentials
 
